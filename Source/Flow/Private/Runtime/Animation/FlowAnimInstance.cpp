@@ -57,8 +57,6 @@ void UFlowAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		return;
 	}
 
-	RotationMode = CharMoveComp->GetRotationMode();
-
 	RefreshLocomotionOnGameThread();
 
 }
@@ -86,7 +84,6 @@ UFlowCharacterMovementComponent* UFlowAnimInstance::GetCharacterMovementComponen
 
 void UFlowAnimInstance::RefreshLocomotionOnGameThread()
 {
-	Gait = CharMoveComp->GetGait();
 
 	const FFlowLocomotionState& CharLocomotionState = CharMoveComp->GetLocomotionState();
 	LocomotionState.Speed = CharLocomotionState.Speed;
@@ -260,4 +257,14 @@ EFlowMovementDirection UFlowAnimInstance::CalculateMovementDirection(const float
 
 	return EFlowMovementDirection::Backward;
 
+}
+
+void UFlowAnimInstance::SetGait_Implementation(EGait DesiredGait)
+{
+	Gait = DesiredGait;
+}
+
+void UFlowAnimInstance::SetRotationMode_Implementation(EFlowRotaionMode DesiredRotationMode)
+{
+	RotationMode = DesiredRotationMode;
 }

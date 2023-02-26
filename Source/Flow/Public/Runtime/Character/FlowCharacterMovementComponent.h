@@ -2,11 +2,9 @@
 
 #pragma once
 
-#include <Runtime/Animation/FlowAnimSetting.h>
-
 #include "CoreMinimal.h"
 #include "FlowCharacterState.h"
-#include "FlowCharacterStateInterface.h"
+#include "Runtime/Interface/FlowCharacterStateInterface.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "FlowCharacterSetting.h"
 #include "FlowCharacterMovementComponent.generated.h"
@@ -76,9 +74,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFlowCharacterInfoSettingDataAsset> CharacterSettings;
 
-public:
-
 #pragma region Gait
+
+public:
 	FGaitSetting GaitSetting;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Move|Locomotion")
@@ -91,22 +89,42 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Move|Gait")
 	EGait Gait{EGait::Walking};
-	 
+
 	virtual EGait GetGait() const override { return Gait; }
 
-	virtual void SetGait(EGait DesiredGait) override;
+	virtual void SetGait_Implementation(EGait DesiredGait) override;
 
-	virtual void OnGaitChanged(EGait NewActualGait) override;
+protected:
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Move|State")
+	void OnGaitChanged(EGait NewActualGait);
 
 	float CalculateGaitAmount() const;
 
 #pragma endregion
 
+#pragma region RotationMode
+
+public:
 	UPROPERTY(BlueprintReadWrite, Category = "Move|Rotation")
-	EFlowRotaionMode RotationMode;
+	EFlowRotaionMode RotationMode {EFlowRotaionMode::VelocityDirection};
 
-	EFlowRotaionMode GetRotationMode() const;
+	UPROPERTY(BlueprintReadWrite, Category = "Move|Rotation")
+	EFlowRotaionMode PreRotationMode{EFlowRotaionMode::VelocityDirection};
 
+	virtual EFlowRotaionMode GetRotationMode() const override { return RotationMode; }
+
+	virtual void SetRotationMode_Implementation(EFlowRotaionMode DesiredRotationMode) override;
+
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "Move|State")
+	void OnRotationModeChanged(EFlowRotaionMode NewRotationMode);
+
+#pragma endregion
+
+#pragma region LocomotionState
+
+public:
 	void UpdateMovementSetting();
 
 	FGaitSetting GetTargetMovementSetting();
@@ -115,6 +133,8 @@ public:
 
 	virtual float GetMaxAcceleration() const override;
 	virtual float GetMaxBrakingDeceleration() const override;
+
+#pragma endregion
 
 public:
 	template<typename T>
@@ -127,12 +147,4 @@ bool UFlowCharacterMovementComponent::IsStateDifferent(T& NewValue, T& Value)
 {
 	return NewValue != Value;
 }
-
-
-inline EFlowRotaionMode UFlowCharacterMovementComponent::GetRotationMode() const
-{
-	return RotationMode;
-}
-
-
 

@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-
 #include "FlowAnimState.h"
 #include "FlowAnimSetting.h"
+#include "Runtime/Interface/FlowCharacterStateInterface.h"
 #include "FlowAnimInstance.generated.h"
-
 
 class AFlowCharacterBase;
 
@@ -34,7 +33,9 @@ class UFlowCharacterMovementComponent;
  * 
  */
 UCLASS(Transient, Blueprintable)
-class FLOW_API UFlowAnimInstance : public UAnimInstance
+class FLOW_API UFlowAnimInstance :
+	public UAnimInstance,
+    public IFlowCharacterStateInterface
 {
 	GENERATED_BODY()
 
@@ -56,12 +57,21 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "Data|Ground")
     FFlowLocomotionAnimState LocomotionState;
 
+    // Interface
+
     UPROPERTY(BlueprintReadWrite, Category = "Base")
     EGait Gait;
 
-    UPROPERTY(BlueprintReadWrite, Category = "Data|Rotation")
+    virtual EGait GetGait() const override { return Gait; }
+
+    virtual void SetGait_Implementation(EGait DesiredGait) override;
+
+    UPROPERTY(BlueprintReadWrite, Category = "Base")
     EFlowRotaionMode RotationMode;
 
+    virtual EFlowRotaionMode GetRotationMode() const override { return RotationMode; }
+
+    virtual void SetRotationMode_Implementation(EFlowRotaionMode DesiredRotationMode) override;
 
     /*
      * Setting

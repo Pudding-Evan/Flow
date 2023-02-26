@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Runtime/Character/FlowLocomotionEnums.h"
 #include "FlowAnimState.generated.h"
 
 USTRUCT(BlueprintType)

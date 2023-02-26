@@ -9,13 +9,11 @@
 #include "Runtime/FlowGameplayTags.h"
 #include "Runtime/Character/FlowCharacterBase.h"
 #include "Runtime/Input/FlowInputComponent.h"
-#include "Runtime/Character/FlowCharacterStateInterface.h"
 
 UFlowCharacterMovementComponent::UFlowCharacterMovementComponent()
 {
 	MaxAcceleration = 1500.0f;
 	BrakingFrictionFactor = 0.5f;
-
 }
 
 void UFlowCharacterMovementComponent::BeginPlay()
@@ -61,7 +59,6 @@ void UFlowCharacterMovementComponent::BindInputAction(UFlowInputComponent* Input
 		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse);
 		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Jump, ETriggerEvent::Started, this, &ThisClass::Input_Jump);
 		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Stance, ETriggerEvent::Started, this, &ThisClass::Input_Stance);
-
 		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Sprint, ETriggerEvent::Started, this, &ThisClass::Input_Sprint_Start);
 		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Sprint, ETriggerEvent::Completed, this, &ThisClass::Input_Sprint_End);
 	}
@@ -121,12 +118,12 @@ void UFlowCharacterMovementComponent::Input_Stance(const FInputActionValue& Inpu
 	{
 	case EGait::Walking:
 		{
-			SetGait(EGait::Running);
+			IFlowCharacterStateInterface::Execute_SetGait(this, EGait::Running);
 			break;
 		}
 	case EGait::Running:
 		{
-			SetGait(EGait::Walking);
+			IFlowCharacterStateInterface::Execute_SetGait(this, EGait::Walking);
 			break;	
 		}
 	default:
@@ -136,12 +133,12 @@ void UFlowCharacterMovementComponent::Input_Stance(const FInputActionValue& Inpu
 
 void UFlowCharacterMovementComponent::Input_Sprint_Start(const FInputActionValue& InputValue)
 {
-	SetGait(EGait::Sprinting);
+	IFlowCharacterStateInterface::Execute_SetGait(this, EGait::Sprinting);
 }
 
 void UFlowCharacterMovementComponent::Input_Sprint_End(const FInputActionValue& InputValue)
 {
-	SetGait(EGait::Running);
+	IFlowCharacterStateInterface::Execute_SetGait(this, EGait::Running);
 }
 
 void UFlowCharacterMovementComponent::UpdateLocomotionState(const float DeltaTime)
@@ -154,7 +151,7 @@ void UFlowCharacterMovementComponent::UpdateLocomotionState(const float DeltaTim
 	LocomotionState.ViewRotation = Character->GetControlRotation();
 	LocomotionState.ViewYawAngle = LocomotionState.ViewRotation.Yaw;
 
-	UE_LOG(LogTemp, Log, TEXT("View Yaw Angle : [%f]"), LocomotionState.ViewYawAngle)
+	UE_LOG(LogTemp, Log, TEXT("View Yaw Angle : [%f]"), LocomotionState.ViewYawAngle);
 
 	const auto& ActorTransform{ GetActorTransform() };
 
@@ -183,21 +180,25 @@ void UFlowCharacterMovementComponent::UpdateLocomotionState(const float DeltaTim
 
 }
 
-
-
-void UFlowCharacterMovementComponent::SetGait(EGait DesiredGait)
+void UFlowCharacterMovementComponent::SetGait_Implementation(EGait DesiredGait)
 {
 	if (IsStateDifferent(DesiredGait, Gait))
 	{
+		PreGait = Gait;
+		Gait = DesiredGait;
+		UpdateMovementSetting();
+
 		OnGaitChanged(DesiredGait);
 	}
 }
 
-void UFlowCharacterMovementComponent::OnGaitChanged(EGait NewActualGait)
+void UFlowCharacterMovementComponent::OnGaitChanged_Implementation(EGait NewActualGait)
 {
-	PreGait = Gait;
-	Gait = NewActualGait;
-	UpdateMovementSetting();
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+	if (AnimInstance->Implements<UFlowCharacterStateInterface>())
+	{
+		IFlowCharacterStateInterface::Execute_SetGait(AnimInstance,NewActualGait);
+	}
 }
 
 float UFlowCharacterMovementComponent::CalculateGaitAmount() const
@@ -209,16 +210,34 @@ float UFlowCharacterMovementComponent::CalculateGaitAmount() const
 		return FMath::GetMappedRangeValueClamped({ 0.0f, GaitSetting.WalkSpeed }, GaitAmount, Speed);
 	}
 
-
 	if (Speed <= GaitSetting.RunSpeed)
 	{
 		static const FVector2f GaitAmount{ 1.0f, 2.0f };
-
 		return FMath::GetMappedRangeValueClamped({ GaitSetting.WalkSpeed, GaitSetting.RunSpeed }, GaitAmount, Speed);
 	}
 
 	static const FVector2f GaitAmount{ 2.0f, 3.0f };
 	return FMath::GetMappedRangeValueClamped({ GaitSetting.RunSpeed, GaitSetting.SprintSpeed }, GaitAmount, Speed);
+}
+
+void UFlowCharacterMovementComponent::SetRotationMode_Implementation(EFlowRotaionMode DesiredRotationMode)
+{
+	if (IsStateDifferent(DesiredRotationMode, RotationMode))
+	{
+		PreRotationMode = RotationMode;
+		RotationMode = DesiredRotationMode;
+
+		OnRotationModeChanged(DesiredRotationMode);
+	}
+}
+
+void UFlowCharacterMovementComponent::OnRotationModeChanged_Implementation(EFlowRotaionMode NewRotationMode)
+{
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+	if (AnimInstance->Implements<UFlowCharacterStateInterface>())
+	{
+		IFlowCharacterStateInterface::Execute_SetRotationMode(AnimInstance,NewRotationMode);
+	}
 }
 
 void UFlowCharacterMovementComponent::UpdateMovementSetting()

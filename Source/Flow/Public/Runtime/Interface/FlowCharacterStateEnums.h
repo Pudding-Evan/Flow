@@ -1,8 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataTable.h"
-#include "FlowLocomotionEnums.generated.h"
+#include "FlowCharacterStateEnums.generated.h"
 
 UENUM(BlueprintType)
 enum class EFlowRotaionMode : uint8

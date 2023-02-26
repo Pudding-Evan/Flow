@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "FlowCharacterStateEnums.h"
 #include "FlowCharacterStateInterface.generated.h"
-
-enum class EGait : uint8;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI,Blueprintable, BlueprintType)
@@ -27,8 +26,11 @@ public:
 
 	virtual EGait GetGait() const = 0;
 
-	virtual void SetGait(EGait DesiredGait) = 0 ;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "State")
+	void SetGait(EGait DesiredGait);
 
-	virtual void OnGaitChanged(EGait NewActualGait) = 0;
+	virtual EFlowRotaionMode GetRotationMode() const = 0;
 
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable, Category = "State")
+	void SetRotationMode(EFlowRotaionMode DesiredRotationMode);
 };

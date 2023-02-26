@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FlowLocomotionEnums.h"
 #include "FlowCharacterState.generated.h"
 
 
