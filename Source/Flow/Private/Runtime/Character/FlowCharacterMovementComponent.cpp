@@ -153,14 +153,10 @@ void UFlowCharacterMovementComponent::UpdateLocomotionState(const float DeltaTim
 
 	LocomotionState.ViewRotation = Character->GetControlRotation();
 	LocomotionState.ViewYawAngle = LocomotionState.ViewRotation.Yaw;
-	const auto& ActorTransform{ GetActorTransform() };
 
-	//const auto SmoothTransform{
-	//		ActorTransform * FTransform{
-	//			Character->GetMesh()->GetRelativeRotationCache().RotatorToQuat(Character->GetMesh()->GetRelativeRotation()) * Character->GetBaseRotationOffset().Inverse(),
-	//			Character->GetMesh()->GetRelativeLocation() - Character->GetBaseTranslationOffset()
-	//		}
-	//	};
+	UE_LOG(LogTemp, Log, TEXT("View Yaw Angle : [%f]"), LocomotionState.ViewYawAngle)
+
+	const auto& ActorTransform{ GetActorTransform() };
 
 	LocomotionState.Location = ActorTransform.GetLocation();
 	LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
@@ -172,9 +168,10 @@ void UFlowCharacterMovementComponent::UpdateLocomotionState(const float DeltaTim
 
 	if(LocomotionState.bHasSpeed)
 	{
-		LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(FMath::Atan2(LocomotionState.Velocity.Y , LocomotionState.Velocity.X)); // Get Angle Form X Axis;
-
+		LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(FMath::RadiansToDegrees(FMath::Atan2(LocomotionState.Velocity.Y , LocomotionState.Velocity.X))); // Get Angle Form X Axis;
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Velocity Yaw Angle : [%f]"), LocomotionState.VelocityYawAngle)
 
 	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
 	LocomotionState.MovementInputDirection = (GetCurrentAcceleration() / GetMaxAcceleration()).GetSafeNormal();;

@@ -98,13 +98,14 @@ struct FLOW_API FFlowVelocityBlendState
     float ForwardAmount{ 0.0f };
 
     UPROPERTY(BlueprintReadWrite, Category = "VelocityBlend")
-    float RightAmount{ 0.0f };
+    float BackwardAmount{ 0.0f };
 
     UPROPERTY(BlueprintReadWrite, Category = "VelocityBlend")
     float LeftAmount{ 0.0f };
 
     UPROPERTY(BlueprintReadWrite, Category = "VelocityBlend")
-    float BackwardAmount{ 0.0f };
+    float RightAmount{ 0.0f };
+
 };
 
 

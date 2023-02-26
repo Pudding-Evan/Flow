@@ -97,7 +97,6 @@ void UFlowAnimInstance::RefreshLocomotionOnGameThread()
 	LocomotionState.VelocityYawAngle = CharLocomotionState.VelocityYawAngle;
 	LocomotionState.ViewYawAngle = CharLocomotionState.ViewYawAngle;
 
-
 	LocomotionState.Location = CharLocomotionState.Location;
 	LocomotionState.Rotation = CharLocomotionState.Rotation;
 	LocomotionState.RotationQuaternion = CharLocomotionState.RotationQuaternion;
@@ -160,11 +159,15 @@ void UFlowAnimInstance::RefreshMovementDirection()
 
 	static constexpr auto ForwardHalfAngle{ 70.0f };
 
-	// operator -> 更新了bLeft
-	GroundedState.MovementDirection = CalculateMovementDirection(
+	auto a = CalculateMovementDirection(
 		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - LocomotionState.ViewYawAngle), // (-180,180]
-		ForwardHalfAngle, 
+		ForwardHalfAngle,
 		5.0f);
+	UE_LOG(LogTemp, Log, TEXT("Movement Direction %d: "), a);
+	// operator -> 更新了bLeft
+	GroundedState.MovementDirection = a;
+
+
 }
 
 float UFlowAnimInstance::CalculateWalkOrRunBlend() const
@@ -226,11 +229,6 @@ void UFlowAnimInstance::RefreshVelocityBlendState()
 	GroundedState.VelocityBlendState.BackwardAmount = FMath::Abs(FMath::Clamp(RelativeDirection.X, -1.0f, 0.0f));
 	GroundedState.VelocityBlendState.LeftAmount = FMath::Abs(FMath::Clamp(RelativeDirection.Y, -1.0f, 0.0f));
 	GroundedState.VelocityBlendState.RightAmount = FMath::Clamp(RelativeDirection.Y, 0.0f, 1.0f);
-
-	UE_LOG(LogTemp,Log,TEXT("Direction Amount - [%f] [%f] [%f] [%f]"), GroundedState.VelocityBlendState.ForwardAmount,
-		GroundedState.VelocityBlendState.BackwardAmount,
-		GroundedState.VelocityBlendState.LeftAmount,
-		GroundedState.VelocityBlendState.RightAmount)
 
 	//TODO InterpTo
 }
