@@ -7,7 +7,8 @@ UENUM(BlueprintType)
 enum class EFlowRotaionMode : uint8
 {
     LookDirection UMETA(DisplayName = "LookDirection"),
-    VelocityDirection UMETA(DisplayName = "VelocityDirection")
+    VelocityDirection UMETA(DisplayName = "VelocityDirection"),
+    Aiming UMETA(DisplayName = "VelocityDirection")
 };
 
 UENUM(BlueprintType)

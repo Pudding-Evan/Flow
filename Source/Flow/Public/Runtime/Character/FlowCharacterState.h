@@ -16,7 +16,7 @@ struct FLOW_API FFlowLocomotionState
     FVector Velocity{ForceInit};
 
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "State")
-    float VelocityYawAngle{0.0f};
+    float VelocityYawAngle{0.0f}; // Velocity.Y / Velocity.X
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cache")
     FVector PreviousVelocity{ForceInit};
@@ -43,7 +43,7 @@ struct FLOW_API FFlowLocomotionState
     FRotator ViewRotation{ ForceInit };
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cache")
-    float ViewYawAngle{ 0.0f };
+    float ViewYawAngle{ 0.0f }; // Rotation Yaw Angle
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cache")
     float PreviousViewYawAngle{ 0.0f };
@@ -54,8 +54,11 @@ struct FLOW_API FFlowLocomotionState
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
     FRotator Rotation{ForceInit};
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	FQuat RotationQuaternion{ForceInit};
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+    float TargetYawAngle{ 0.0f };
     
 };
 

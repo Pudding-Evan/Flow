@@ -74,6 +74,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFlowCharacterInfoSettingDataAsset> CharacterSettings;
 
+#pragma region Locomotion
+
+public:
+	void UpdateGroundedRotaion(float DeltaTime);
+
+	void SmoothCharacterRotation(const float TargetYawAngle,const float DeltaTime, float TargetInterpSpeed, float ActorInterpSpeed);
+
+#pragma endregion
+
 #pragma region Gait
 
 public:

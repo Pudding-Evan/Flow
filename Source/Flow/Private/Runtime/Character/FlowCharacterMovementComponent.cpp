@@ -36,6 +36,7 @@ void UFlowCharacterMovementComponent::OnRegister()
 	LocomotionState.Location = ActorTransform.GetLocation();
 	LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
 	LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
+	LocomotionState.TargetYawAngle = LocomotionState.Rotation.Yaw;
 
 	UE_LOG(LogTemp, Log, TEXT("OnRegisterMovementComponent "));
 }
@@ -46,6 +47,8 @@ void UFlowCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick 
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	UpdateLocomotionState(DeltaTime);
+
+	UpdateGroundedRotaion(DeltaTime);
 
 }
 
@@ -140,6 +143,71 @@ void UFlowCharacterMovementComponent::Input_Sprint_End(const FInputActionValue& 
 {
 	IFlowCharacterStateInterface::Execute_SetGait(this, EGait::Running);
 }
+
+void UFlowCharacterMovementComponent::UpdateGroundedRotaion(float DeltaTime)
+{
+	// Moving -
+	if(LocomotionState.bMoving && !Character->HasAnyRootMotion())
+	{
+		// Rotation Mode
+		static constexpr auto TargetVelocityInterpSpeed{ 800.0f };
+		static constexpr auto TargetLookInterpSpeed{ 500.0f };
+		static constexpr auto TargetAimingInterpSpeed{ 1000.f };
+		static constexpr auto NormalActorInterpSpeed{ 12.0f };
+		static constexpr auto FastActorInterpSpeed{ 20.0f };
+
+		if(RotationMode == EFlowRotaionMode::VelocityDirection)
+		{
+			SmoothCharacterRotation(LocomotionState.VelocityYawAngle, DeltaTime, TargetVelocityInterpSpeed, NormalActorInterpSpeed);
+			return;
+		}
+
+		if(RotationMode == EFlowRotaionMode::LookDirection)
+		{
+			float Angle = LocomotionState.Rotation.Yaw;
+			if (Angle > 180.0f) Angle = 180 - Angle;
+
+			if(Gait == EGait::Walking || Gait == EGait::Running)
+			{
+				SmoothCharacterRotation(Angle, DeltaTime, TargetLookInterpSpeed, NormalActorInterpSpeed);
+			}
+			else
+			{
+				SmoothCharacterRotation(LocomotionState.VelocityYawAngle, DeltaTime, TargetLookInterpSpeed, NormalActorInterpSpeed);
+			}
+			return;
+		}
+
+		if (RotationMode == EFlowRotaionMode::Aiming)
+		{
+			SmoothCharacterRotation(LocomotionState.VelocityYawAngle, DeltaTime, TargetAimingInterpSpeed, FastActorInterpSpeed);
+			return;
+		}
+
+	}
+	else
+	{
+		//TODO NotMoving Animation Rotate.
+
+		
+	}
+
+}
+
+void UFlowCharacterMovementComponent::SmoothCharacterRotation(const float TargetYawAngle, const float DeltaTime,
+	float TargetInterpSpeed, float ActorInterpSpeed)
+{
+	LocomotionState.TargetYawAngle  = FMath::FInterpConstantTo(LocomotionState.TargetYawAngle, TargetYawAngle, DeltaTime, TargetInterpSpeed);
+
+	float DeltalYawAngle = FMath::FInterpTo(LocomotionState.Rotation.Yaw, LocomotionState.TargetYawAngle, DeltaTime, ActorInterpSpeed);
+
+	FRotator ActualRotation = LocomotionState.Rotation;
+	ActualRotation.Yaw = DeltalYawAngle;
+
+	Character->SetActorRotation(ActualRotation);
+
+}
+
 
 void UFlowCharacterMovementComponent::UpdateLocomotionState(const float DeltaTime)
 {
