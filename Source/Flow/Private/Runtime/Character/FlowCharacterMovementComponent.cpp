@@ -9,6 +9,7 @@
 #include "Runtime/FlowGameplayTags.h"
 #include "Runtime/Character/FlowCharacterBase.h"
 #include "Runtime/Input/FlowInputComponent.h"
+#include "Runtime/Utility/FlowMathLibrary.h"
 
 UFlowCharacterMovementComponent::UFlowCharacterMovementComponent()
 {
@@ -38,7 +39,7 @@ void UFlowCharacterMovementComponent::OnRegister()
 	LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
 	LocomotionState.TargetYawAngle = LocomotionState.Rotation.Yaw;
 
-	UE_LOG(LogTemp, Log, TEXT("OnRegisterMovementComponent "));
+	//UE_LOG(LogTemp, Log, TEXT("OnRegisterMovementComponent "));
 }
 
 void UFlowCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -197,14 +198,15 @@ void UFlowCharacterMovementComponent::UpdateGroundedRotaion(float DeltaTime)
 void UFlowCharacterMovementComponent::SmoothCharacterRotation(const float TargetYawAngle, const float DeltaTime,
 	float TargetInterpSpeed, float ActorInterpSpeed)
 {
-	LocomotionState.TargetYawAngle  = FMath::FInterpConstantTo(LocomotionState.TargetYawAngle, TargetYawAngle, DeltaTime, TargetInterpSpeed);
+	LocomotionState.TargetYawAngle = TargetYawAngle;
+	LocomotionState.SmoothTargetYawAngle = UFlowMathLibrary::InterpolateAngleConstant(LocomotionState.SmoothTargetYawAngle, TargetYawAngle, DeltaTime, TargetInterpSpeed);
 
-	float DeltalYawAngle = FMath::FInterpTo(LocomotionState.Rotation.Yaw, LocomotionState.TargetYawAngle, DeltaTime, ActorInterpSpeed);
+	FRotator NewRotation{ LocomotionState.Rotation };
 
-	FRotator ActualRotation = LocomotionState.Rotation;
-	ActualRotation.Yaw = DeltalYawAngle;
+	NewRotation.Yaw = UFlowMathLibrary::ExponentialDecayAngle(FRotator::NormalizeAxis(NewRotation.Yaw), LocomotionState.SmoothTargetYawAngle, DeltaTime, ActorInterpSpeed);
 
-	Character->SetActorRotation(ActualRotation);
+	Character->SetActorRotation(NewRotation);
+
 
 }
 
@@ -219,7 +221,7 @@ void UFlowCharacterMovementComponent::UpdateLocomotionState(const float DeltaTim
 	LocomotionState.ViewRotation = Character->GetControlRotation();
 	LocomotionState.ViewYawAngle = LocomotionState.ViewRotation.Yaw;
 
-	UE_LOG(LogTemp, Log, TEXT("View Yaw Angle : [%f]"), LocomotionState.ViewYawAngle);
+	//UE_LOG(LogTemp, Log, TEXT("View Yaw Angle : [%f]"), LocomotionState.ViewYawAngle);
 
 	const auto& ActorTransform{ GetActorTransform() };
 
@@ -236,7 +238,7 @@ void UFlowCharacterMovementComponent::UpdateLocomotionState(const float DeltaTim
 		LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(FMath::RadiansToDegrees(FMath::Atan2(LocomotionState.Velocity.Y , LocomotionState.Velocity.X))); // Get Angle Form X Axis;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Velocity Yaw Angle : [%f]"), LocomotionState.VelocityYawAngle)
+	//UE_LOG(LogTemp, Log, TEXT("Velocity Yaw Angle : [%f]"), LocomotionState.VelocityYawAngle)
 
 	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
 	LocomotionState.MovementInputDirection = (GetCurrentAcceleration() / GetMaxAcceleration()).GetSafeNormal();;

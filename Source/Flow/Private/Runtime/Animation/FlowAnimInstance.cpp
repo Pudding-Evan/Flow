@@ -156,13 +156,12 @@ void UFlowAnimInstance::RefreshMovementDirection()
 
 	static constexpr auto ForwardHalfAngle{ 70.0f };
 
-	auto a = CalculateMovementDirection(
+	EFlowMovementDirection Direction = CalculateMovementDirection(
 		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - LocomotionState.ViewYawAngle), // (-180,180]
 		ForwardHalfAngle,
 		5.0f);
-	UE_LOG(LogTemp, Log, TEXT("Movement Direction %d: "), a);
-	// operator -> 更新了bLeft
-	GroundedState.MovementDirection = a;
+
+	GroundedState.MovementDirection = Direction;
 
 
 }
