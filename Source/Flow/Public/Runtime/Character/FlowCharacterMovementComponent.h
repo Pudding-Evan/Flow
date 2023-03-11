@@ -66,6 +66,10 @@ public:
 
 	void Input_Sprint_End(const FInputActionValue& InputValue);
 
+	void Input_Crouch(const FInputActionValue& InputValue);
+
+	void Input_UnCrouch(const FInputActionValue& InputValue);
+
 protected:
 
 	UPROPERTY()
@@ -131,6 +135,24 @@ protected:
 
 #pragma endregion
 
+#pragma region Stance
+
+	UPROPERTY(BlueprintReadWrite, Category = "Move|Rotation")
+	EStance Stance{EStance::Standing};
+
+	UPROPERTY(BlueprintReadWrite, Category = "Move|Rotation")
+	EStance PreStance {EStance::Standing};
+
+	virtual EStance GetStance() const override { return Stance; }
+
+	virtual void SetStance_Implementation(EStance DesiredStance) override;
+
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "Move|State")
+	void OnStanceChanged(EStance NewStance);
+
+#pragma endregion
+
 #pragma region LocomotionState
 
 public:
@@ -144,6 +166,8 @@ public:
 	virtual float GetMaxBrakingDeceleration() const override;
 
 #pragma endregion
+
+
 
 public:
 	template<typename T>

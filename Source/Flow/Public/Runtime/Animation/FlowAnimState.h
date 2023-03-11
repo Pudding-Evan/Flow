@@ -13,6 +13,9 @@ public:
 	bool bMoving{ false };
 
     UPROPERTY(BlueprintReadWrite, Category = "Locomotion")
+    bool bIsCourch{ false };
+
+    UPROPERTY(BlueprintReadWrite, Category = "Locomotion")
     FVector Velocity{ForceInit};
 
     UPROPERTY(BlueprintReadWrite, Category = "Locomotion")

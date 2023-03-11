@@ -19,13 +19,13 @@ struct FAnimCurves
 public:
 
     UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UCurveFloat> StrideBlend_N_Walk;
+    TObjectPtr<UCurveFloat> StrideBlend_N_Walk{nullptr};
 
     UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UCurveFloat> StrideBlend_N_Run;
+    TObjectPtr<UCurveFloat> StrideBlend_N_Run{ nullptr };
 
     UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UCurveFloat> StrideBlend_N_Crouch;
+    TObjectPtr<UCurveFloat> StrideBlend_N_Crouch{ nullptr };
 };
 
 class UFlowCharacterMovementComponent;
@@ -72,6 +72,14 @@ public:
     virtual EFlowRotaionMode GetRotationMode() const override { return RotationMode; }
 
     virtual void SetRotationMode_Implementation(EFlowRotaionMode DesiredRotationMode) override;
+
+    UPROPERTY(BlueprintReadWrite, Category = "Base")
+    EStance Stance;
+
+    virtual EStance GetStance() const override { return Stance; }
+
+    virtual void SetStance_Implementation(EStance DesiredStance) override;
+
 
     /*
      * Setting

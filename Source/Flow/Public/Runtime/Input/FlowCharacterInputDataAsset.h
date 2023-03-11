@@ -21,7 +21,7 @@ public:
 	int32 Priority;
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputMappingContext> InputMappingContext;
+	TObjectPtr<UInputMappingContext> InputMappingContext{nullptr};
 	
 };
 

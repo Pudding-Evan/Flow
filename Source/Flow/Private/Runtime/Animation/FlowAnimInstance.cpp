@@ -267,3 +267,9 @@ void UFlowAnimInstance::SetRotationMode_Implementation(EFlowRotaionMode DesiredR
 {
 	RotationMode = DesiredRotationMode;
 }
+
+void UFlowAnimInstance::SetStance_Implementation(EStance DesiredStance)
+{
+	Stance = DesiredStance;
+	LocomotionState.bIsCourch = Stance == EStance::Crouching ? true : false;
+}

@@ -33,4 +33,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable, Category = "State")
 	void SetRotationMode(EFlowRotaionMode DesiredRotationMode);
+
+	virtual EStance GetStance() const = 0;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "State")
+	void SetStance(EStance DesiredStance);
+
 };

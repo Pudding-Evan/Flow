@@ -65,6 +65,9 @@ void UFlowCharacterMovementComponent::BindInputAction(UFlowInputComponent* Input
 		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Stance, ETriggerEvent::Started, this, &ThisClass::Input_Stance);
 		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Sprint, ETriggerEvent::Started, this, &ThisClass::Input_Sprint_Start);
 		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Sprint, ETriggerEvent::Completed, this, &ThisClass::Input_Sprint_End);
+		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Crouch, ETriggerEvent::Started, this, &ThisClass::Input_Crouch);
+		FlowInputComp->BindNativeAction(InputConfig, GameplayTags.InputTag_Crouch, ETriggerEvent::Completed, this, &ThisClass::Input_UnCrouch);
+
 	}
 }
 
@@ -111,7 +114,6 @@ void UFlowCharacterMovementComponent::Input_LookMouse(const FInputActionValue& I
 }
 
 void UFlowCharacterMovementComponent::Input_Jump(const FInputActionValue& InputValue)
-
 {
 	Character->Jump();
 }
@@ -145,6 +147,18 @@ void UFlowCharacterMovementComponent::Input_Sprint_End(const FInputActionValue& 
 	IFlowCharacterStateInterface::Execute_SetGait(this, EGait::Running);
 }
 
+void UFlowCharacterMovementComponent::Input_Crouch(const FInputActionValue& InputValue)
+{
+	IFlowCharacterStateInterface::Execute_SetStance(this,EStance::Crouching);
+	Character->Crouch();
+}
+
+void UFlowCharacterMovementComponent::Input_UnCrouch(const FInputActionValue& InputValue)
+{
+	IFlowCharacterStateInterface::Execute_SetStance(this,EStance::Standing);
+	Character->UnCrouch();
+}
+
 void UFlowCharacterMovementComponent::UpdateGroundedRotaion(float DeltaTime)
 {
 	// Moving -
@@ -165,12 +179,9 @@ void UFlowCharacterMovementComponent::UpdateGroundedRotaion(float DeltaTime)
 
 		if(RotationMode == EFlowRotaionMode::LookDirection)
 		{
-			float Angle = LocomotionState.Rotation.Yaw;
-			if (Angle > 180.0f) Angle = 180 - Angle;
-
 			if(Gait == EGait::Walking || Gait == EGait::Running)
 			{
-				SmoothCharacterRotation(Angle, DeltaTime, TargetLookInterpSpeed, NormalActorInterpSpeed);
+				SmoothCharacterRotation(LocomotionState.ViewYawAngle, DeltaTime, TargetLookInterpSpeed, NormalActorInterpSpeed);
 			}
 			else
 			{
@@ -307,6 +318,26 @@ void UFlowCharacterMovementComponent::OnRotationModeChanged_Implementation(EFlow
 	if (AnimInstance->Implements<UFlowCharacterStateInterface>())
 	{
 		IFlowCharacterStateInterface::Execute_SetRotationMode(AnimInstance,NewRotationMode);
+	}
+}
+
+void UFlowCharacterMovementComponent::SetStance_Implementation(EStance DesiredStance)
+{
+	if (IsStateDifferent(DesiredStance, Stance))
+	{
+		PreStance = Stance;
+		Stance = DesiredStance;
+
+		OnStanceChanged(DesiredStance);
+	}
+}
+
+void UFlowCharacterMovementComponent::OnStanceChanged_Implementation(EStance NewStance)
+{
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+	if (AnimInstance->Implements<UFlowCharacterStateInterface>())
+	{
+		IFlowCharacterStateInterface::Execute_SetStance(AnimInstance, NewStance);
 	}
 }
 

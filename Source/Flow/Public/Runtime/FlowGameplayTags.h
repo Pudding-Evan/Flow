@@ -20,6 +20,8 @@ public:
 	FGameplayTag InputTag_Stance = FGameplayTag::RequestGameplayTag(FName(TEXT("Input.Stance")));
 
 	FGameplayTag InputTag_Sprint = FGameplayTag::RequestGameplayTag(FName(TEXT("Input.Sprint")));
+
+	FGameplayTag InputTag_Crouch = FGameplayTag::RequestGameplayTag(FName(TEXT("Input.Crouch")));
 private:
 
 	static FFlowGameplayTags GameplayTags;

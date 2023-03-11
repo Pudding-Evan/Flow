@@ -12,13 +12,13 @@ struct FAnimCurvesSetting
 public:
 
     UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UCurveFloat> StrideBlend_N_Walk;
+    TObjectPtr<UCurveFloat> StrideBlend_N_Walk{nullptr};
 
     UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UCurveFloat> StrideBlend_N_Run;
+    TObjectPtr<UCurveFloat> StrideBlend_N_Run{ nullptr };
 
     UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UCurveFloat> StrideBlend_N_Crouch;
+    TObjectPtr<UCurveFloat> StrideBlend_N_Crouch{ nullptr };
 };
 
 USTRUCT(BlueprintType)
